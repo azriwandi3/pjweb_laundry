@@ -140,7 +140,7 @@ const getAllOrders = async (req, res) => {
         const result = await db.query(query, params);
 
         // Get count for pagination
-        let countQuery = 'SELECT COUNT(*) FROM orders o';
+        let countQuery = 'SELECT COUNT(*) as count FROM orders o';
         let countParams = [];
 
         if (req.user.role !== 'admin') {

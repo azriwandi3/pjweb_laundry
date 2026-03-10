@@ -5,7 +5,7 @@ const path = require('path');
 const migrate = async () => {
     try {
         const db = await open({
-            filename: path.join(__dirname, '../../laundry_db.sqlite'),
+            filename: path.join(__dirname, '../laundry_db.sqlite'),
             driver: sqlite3.Database
         });
 
