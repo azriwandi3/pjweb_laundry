@@ -1,0 +1,118 @@
+# LaundryKu Website - Complete Walkthrough
+
+Website laundry fullstack **100% selesai** dengan React + Vite (frontend) dan Node.js + Express (backend).
+
+---
+
+## 🎉 Hasil Implementasi
+
+### Landing Page
+![Landing Page](C:/Users/asusa/.gemini/antigravity/brain/f1a84943-b4f9-4906-8ce5-c7a18deaa91e/landing_page_1769592291385.png)
+
+### Login Page
+![Login Page](C:/Users/asusa/.gemini/antigravity/brain/f1a84943-b4f9-4906-8ce5-c7a18deaa91e/login_page_1769592299415.png)
+
+---
+
+## ✅ Semua Fitur Selesai
+
+### Customer Features
+| Feature | File | Status |
+|---------|------|--------|
+| Landing Page | `LandingPage.jsx` | ✅ |
+| Login/Register | `LoginPage.jsx`, `RegisterPage.jsx` | ✅ |
+| Dashboard | `DashboardPage.jsx` | ✅ |
+| Order Form | `OrderPage.jsx` | ✅ |
+| Order History | `OrdersPage.jsx` | ✅ |
+| **Order Tracking** | `TrackingPage.jsx` | ✅ |
+
+### Admin Features
+| Feature | File | Status |
+|---------|------|--------|
+| Admin Dashboard | `AdminDashboard.jsx` | ✅ |
+| Order Management | `OrderManagement.jsx` | ✅ |
+| **Finance Report** | `FinanceReport.jsx` | ✅ |
+
+---
+
+## 📁 Project Structure
+
+```
+pjweb_laundry/
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── database.js    # PostgreSQL connection
+│   │   │   └── db.sql         # Database schema
+│   │   ├── controllers/
+│   │   │   ├── authController.js
+│   │   │   ├── orderController.js
+│   │   │   └── serviceController.js
+│   │   ├── middleware/
+│   │   │   ├── auth.js        # JWT auth
+│   │   │   └── validate.js    # Zod validation
+│   │   ├── routes/
+│   │   │   ├── authRoutes.js
+│   │   │   ├── orderRoutes.js
+│   │   │   └── serviceRoutes.js
+│   │   └── index.js           # Express server
+│   ├── .env
+│   └── package.json
+│
+└── frontend/
+    ├── src/
+    │   ├── components/
+    │   │   ├── Navbar.jsx
+    │   │   ├── Footer.jsx
+    │   │   └── ProtectedRoute.jsx
+    │   ├── layouts/
+    │   │   └── MainLayout.jsx
+    │   ├── pages/
+    │   │   ├── customer/
+    │   │   │   ├── DashboardPage.jsx
+    │   │   │   ├── OrderPage.jsx
+    │   │   │   ├── OrdersPage.jsx
+    │   │   │   └── TrackingPage.jsx
+    │   │   ├── admin/
+    │   │   │   ├── AdminDashboard.jsx
+    │   │   │   ├── OrderManagement.jsx
+    │   │   │   └── FinanceReport.jsx
+    │   │   ├── LandingPage.jsx
+    │   │   ├── LoginPage.jsx
+    │   │   ├── RegisterPage.jsx
+    │   │   └── ServicesPage.jsx
+    │   ├── services/
+    │   │   └── api.js          # Axios API
+    │   ├── store/
+    │   │   ├── authStore.js    # Zustand auth
+    │   │   └── cartStore.js    # Zustand cart
+    │   ├── App.jsx
+    │   └── index.css           # Tailwind CSS
+    ├── vite.config.js
+    └── package.json
+```
+
+---
+
+## 🚀 Cara Menjalankan
+
+### Backend
+```bash
+cd backend
+npm install
+# Setup PostgreSQL & jalankan db.sql
+npm run dev   # http://localhost:5000
+```
+
+### Frontend  
+```bash
+cd frontend
+npm install
+npm run dev   # http://localhost:5174
+```
+
+---
+
+## 📹 Demo Recording
+![Demo Video](C:/Users/asusa/.gemini/antigravity/brain/f1a84943-b4f9-4906-8ce5-c7a18deaa91e/laundry_full_demo_1769592278521.webp)
+![Testing Login Error Demo](C:/Users/asusa/.gemini/antigravity/brain/f1a84943-b4f9-4906-8ce5-c7a18deaa91e/laundry_testing_login_1773122457335.webp)
