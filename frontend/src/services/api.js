@@ -61,6 +61,7 @@ export const ordersAPI = {
     updatePayment: (id, payment_status) => api.patch(`/orders/${id}/payment`, { payment_status }),
     updateActualWeight: (id, items) => api.post(`/orders/${id}/actual-weight`, { items }),
     confirmWeight: (id) => api.post(`/orders/${id}/confirm-weight`),
+    rejectWeight: (id) => api.post(`/orders/${id}/reject-weight`),
     markAsRead: (id) => api.put(`/orders/${id}/mark-read`),
     getStats: () => api.get('/orders/stats/overview'),
 };

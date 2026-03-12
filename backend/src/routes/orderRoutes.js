@@ -9,6 +9,7 @@ const {
     getOrderStats,
     updateActualWeight,
     confirmWeight,
+    rejectWeight,
     markAsRead
 } = require('../controllers/orderController');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
@@ -24,6 +25,7 @@ router.get('/:id', getOrderById);
 
 // Customer only routes
 router.post('/:id/confirm-weight', confirmWeight);
+router.post('/:id/reject-weight', rejectWeight);
 router.put('/:id/mark-read', markAsRead);
 
 // Admin only routes

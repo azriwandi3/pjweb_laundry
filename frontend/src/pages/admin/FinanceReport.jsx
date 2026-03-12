@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ordersAPI } from '../../services/api';
 
 export default function FinanceReport() {
@@ -46,6 +47,7 @@ export default function FinanceReport() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
+                    <Link to="/admin" className="text-primary-600 hover:text-primary-700 text-sm font-medium mb-2 inline-block">← Kembali ke Dashboard</Link>
                     <h1 className="text-3xl font-bold text-gray-900">Laporan Keuangan</h1>
                     <p className="text-gray-600">Overview pendapatan dan statistik bisnis</p>
                 </div>

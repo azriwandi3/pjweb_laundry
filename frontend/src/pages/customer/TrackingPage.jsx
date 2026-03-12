@@ -1,31 +1,62 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ordersAPI } from '../../services/api';
+import { ordersAPI, settingsAPI } from '../../services/api';
 
 export default function TrackingPage() {
     const { id } = useParams();
     const [order, setOrder] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [deliveryFee, setDeliveryFee] = useState(15000);
+
+    // Determine which process steps are relevant based on order items
+    const getServiceFlags = () => {
+        const items = order?.items || [];
+        const names = items.map(i => (i.service_name || '').toLowerCase());
+
+        const hasWashing = names.some(n =>
+            n.includes('cuci') || n.includes('express') || n.includes('bedcover') || n.includes('sepatu')
+        );
+        const hasIroning = names.some(n =>
+            n.includes('setrika') || n.includes('komplit') || n.includes('express')
+        );
+
+        // If no items loaded yet, show all steps as fallback
+        if (items.length === 0) return { hasWashing: true, hasIroning: true };
+
+        return { hasWashing, hasIroning };
+    };
 
     const getStatusSteps = () => {
+        const { hasWashing, hasIroning } = getServiceFlags();
+        const isCourier = order?.delivery_type === 'pickup_delivery';
+
         let steps = [
             { key: 'pending', label: 'Pesanan Dibuat', icon: '📝', desc: 'Menunggu konfirmasi admin' }
         ];
 
-        if (order?.delivery_type === 'pickup_delivery') {
+        if (isCourier) {
             steps.push({ key: 'kurir_menuju_lokasi', label: 'Kurir OTW', icon: '🛵', desc: 'Kurir menuju lokasi Anda' });
-            steps.push({ key: 'picked_up', label: 'Selesai Dijemput', icon: '🚚', desc: 'Barang sedang dibawa kurir' });
         }
 
         steps.push({ key: 'barang_diterima', label: 'Barang Diterima', icon: '📦', desc: 'Cucian telah berada di Laundry' });
         steps.push({ key: 'menunggu_penimbangan', label: 'Menunggu Timbang', icon: '⚖️', desc: 'Kasir menimbang cucian' });
         steps.push({ key: 'menunggu_konfirmasi_berat', label: 'Konfirmasi Berat', icon: '⚠️', desc: 'Perlu persetujuan Anda' });
-        steps.push({ key: 'washing', label: 'Dicuci', icon: '🧺', desc: 'Proses pencucian' });
-        steps.push({ key: 'ironing', label: 'Disetrika', icon: '👔', desc: 'Proses setrika' });
+
+        if (hasWashing) {
+            steps.push({ key: 'washing', label: 'Dicuci', icon: '🧺', desc: 'Proses pencucian' });
+        }
+        if (hasIroning) {
+            steps.push({ key: 'ironing', label: 'Disetrika', icon: '👔', desc: 'Proses setrika' });
+        }
+        // If neither washing nor ironing (e.g. Dry Clean only), show generic processing
+        if (!hasWashing && !hasIroning) {
+            steps.push({ key: 'washing', label: 'Diproses', icon: '🔄', desc: 'Sedang diproses' });
+        }
+
         steps.push({ key: 'ready', label: 'Siap', icon: '✅', desc: 'Cucian siap' });
 
-        if (order?.delivery_type === 'pickup_delivery') {
+        if (isCourier) {
             steps.push({ key: 'delivering', label: 'Diantar', icon: '🛵', desc: 'Dalam perjalanan ke lokasi Anda' });
         }
 
@@ -51,17 +82,47 @@ export default function TrackingPage() {
             }
         };
         if (id) fetchOrder();
+
+        // Fetch delivery fee for courier fee warning
+        settingsAPI.getAll().then(res => {
+            if (res.data.settings?.delivery_fee) {
+                setDeliveryFee(parseFloat(res.data.settings.delivery_fee));
+            }
+        }).catch(() => {});
     }, [id]);
 
     const handleConfirmWeight = async () => {
         setIsLoading(true);
         try {
             await ordersAPI.confirmWeight(id);
-            // Refresh order
             const response = await ordersAPI.getById(id);
             setOrder(response.data.order);
         } catch (err) {
             alert('Gagal mengkonfirmasi persetujuan harga final');
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleRejectWeight = async () => {
+        const isCourier = order?.delivery_type === 'pickup_delivery';
+        const feeFormatted = deliveryFee.toLocaleString('id-ID');
+
+        let warningMsg = 'Apakah Anda yakin ingin membatalkan pesanan ini?';
+        if (isCourier) {
+            warningMsg += `\n\n⚠️ PERHATIAN: Pembatalan akan tetap dikenakan biaya ongkos kirim kurir sebesar Rp ${feeFormatted} karena kurir sudah menjemput barang Anda.`;
+        }
+
+        if (!confirm(warningMsg)) return;
+
+        setIsLoading(true);
+        try {
+            await ordersAPI.rejectWeight(id);
+            const response = await ordersAPI.getById(id);
+            setOrder(response.data.order);
+        } catch (err) {
+            alert('Gagal membatalkan pesanan');
             console.error(err);
         } finally {
             setIsLoading(false);
@@ -135,21 +196,54 @@ export default function TrackingPage() {
 
                 {/* Confirm Weight Status */}
                 {order.status === 'menunggu_konfirmasi_berat' && (
-                    <div className="card p-6 mb-6 bg-yellow-50 border-yellow-200">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
-                            <div className="flex items-center space-x-4">
-                                <span className="text-4xl">⚖️</span>
-                                <div>
-                                    <h3 className="text-lg font-bold text-yellow-800">Menunggu Konfirmasi Harga Final</h3>
-                                    <p className="text-yellow-700">Laundry Anda telah ditimbang. Periksa kembali total harga baru sebelum kami memproses cucian Anda.</p>
-                                    <p className="text-sm font-semibold text-red-600 mt-1">Batas waktu: 1x24 Jam dari sekarang</p>
+                    <div className="card p-6 mb-6 bg-yellow-50 border-2 border-yellow-300">
+                        <div className="flex items-start gap-4 mb-4">
+                            <span className="text-4xl">⚖️</span>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-bold text-yellow-800">Konfirmasi Harga Final</h3>
+                                <p className="text-yellow-700 text-sm mt-1">Cucian Anda telah ditimbang. Periksa total harga baru di bawah ini.</p>
+                                <p className="text-xs font-semibold text-red-600 mt-1">⏰ Batas waktu konfirmasi: 1×24 jam (otomatis batal jika tidak dikonfirmasi)</p>
+                            </div>
+                        </div>
+
+                        {/* Price Summary */}
+                        {order.items && (
+                            <div className="bg-white rounded-xl border border-yellow-200 p-4 mb-4">
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Rincian Harga Aktual</h4>
+                                <div className="space-y-2">
+                                    {order.items.map((item, idx) => (
+                                        <div key={idx} className="flex justify-between text-sm">
+                                            <span className="text-gray-700">{item.service_name} ({item.quantity} {item.unit})</span>
+                                            <span className="font-semibold">Rp {parseInt(item.subtotal || 0).toLocaleString('id-ID')}</span>
+                                        </div>
+                                    ))}
+                                    {order.delivery_type === 'pickup_delivery' && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-700">Ongkos Kurir</span>
+                                            <span className="font-semibold">Rp {parseInt(order.delivery_fee || 0).toLocaleString('id-ID')}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between pt-2 border-t border-dashed border-gray-300">
+                                        <span className="font-bold text-gray-900">Total Harga Final</span>
+                                        <span className="font-bold text-lg text-primary-600">Rp {parseInt(order.total_price || 0).toLocaleString('id-ID')}</span>
+                                    </div>
                                 </div>
                             </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3">
                             <button
                                 onClick={handleConfirmWeight}
-                                className="btn-primary whitespace-nowrap"
+                                className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-colors shadow-md shadow-green-600/30"
                             >
-                                Setujui & Lanjutkan
+                                ✅ Setujui & Lanjutkan
+                            </button>
+                            <button
+                                onClick={handleRejectWeight}
+                                className="flex-1 py-3 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-xl transition-colors"
+                            >
+                                ❌ Tolak / Batalkan
                             </button>
                         </div>
                     </div>

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useCartStore from '../../store/cartStore';
+import useAuthStore from '../../store/authStore';
 import { servicesAPI, ordersAPI, settingsAPI } from '../../services/api';
 
 export default function OrderPage() {
     const navigate = useNavigate();
     const { items, addItem, updateQuantity, removeItem, clearCart, getTotal, setPickupDetails, getOrderData } = useCartStore();
+    const { user } = useAuthStore();
 
     const [services, setServices] = useState([]);
     const [deliveryFee, setDeliveryFee] = useState(15000);
@@ -15,7 +17,8 @@ export default function OrderPage() {
     const [deliveryType, setDeliveryType] = useState('self_service');
     const [pickupForm, setPickupForm] = useState({
         pickupDate: '',
-        pickupAddress: '',
+        pickupAddress: user?.address || '',
+        pickupPhone: user?.phone || '',
         notes: '',
     });
 
@@ -136,7 +139,8 @@ export default function OrderPage() {
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    updateQuantity(service.id, cartItem.quantity - 0.5);
+                                                                    const step = service.unit === 'pcs' ? 1 : 0.5;
+                                                                    updateQuantity(service.id, cartItem.quantity - step);
                                                                 }}
                                                                 className="w-8 h-8 rounded-lg bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
                                                             >
@@ -148,7 +152,8 @@ export default function OrderPage() {
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    updateQuantity(service.id, cartItem.quantity + 0.5);
+                                                                    const step = service.unit === 'pcs' ? 1 : 0.5;
+                                                                    updateQuantity(service.id, cartItem.quantity + step);
                                                                 }}
                                                                 className="w-8 h-8 rounded-lg bg-primary-500 hover:bg-primary-600 text-white flex items-center justify-center"
                                                             >
@@ -164,6 +169,17 @@ export default function OrderPage() {
                                             </div>
                                         );
                                     })}
+                                </div>
+
+                                {/* Weight Estimate Disclaimer */}
+                                <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                                    <div className="flex items-start gap-3">
+                                        <span className="text-xl mt-0.5">⚠️</span>
+                                        <div>
+                                            <p className="text-sm font-semibold text-amber-800">Disclaimer Berat Estimasi</p>
+                                            <p className="text-xs text-amber-700 mt-1">Harga yang tertera adalah <strong>estimasi</strong> berdasarkan jumlah yang Anda masukkan. <strong>Harga final akan ditentukan setelah penimbangan manual oleh kurir/outlet.</strong> Jika terdapat selisih, Anda akan diminta konfirmasi ulang sebelum proses cucian dimulai.</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -193,7 +209,16 @@ export default function OrderPage() {
                                                     ? 'border-primary-500 bg-primary-50'
                                                     : 'border-gray-200 hover:border-primary-200'
                                                     }`}
-                                                onClick={() => setDeliveryType('pickup_delivery')}
+                                                onClick={() => {
+                                                    setDeliveryType('pickup_delivery');
+                                                    // Auto-fill address & phone from user profile if empty
+                                                    if (!pickupForm.pickupAddress && user?.address) {
+                                                        setPickupForm(prev => ({ ...prev, pickupAddress: user.address }));
+                                                    }
+                                                    if (!pickupForm.pickupPhone && user?.phone) {
+                                                        setPickupForm(prev => ({ ...prev, pickupPhone: user.phone }));
+                                                    }
+                                                }}
                                             >
                                                 <div className="font-semibold text-gray-900">Kurir Laundry</div>
                                                 <div className="text-sm text-gray-500 mt-1">
@@ -205,16 +230,36 @@ export default function OrderPage() {
 
                                     {deliveryType === 'pickup_delivery' && (
                                         <>
+                                            {/* Pre-filled profile info banner */}
+                                            {user?.address && (
+                                                <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800 flex items-center gap-2">
+                                                    <span>✅</span>
+                                                    <span>Alamat dan nomor telepon otomatis terisi dari profil Anda. Anda tetap bisa mengubahnya di bawah.</span>
+                                                </div>
+                                            )}
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Tanggal Penjemputan
+                                                    Tanggal Penjemputan <span className="text-red-500">*</span>
                                                 </label>
                                                 <input
                                                     type="date"
+                                                    required
                                                     className="input"
                                                     value={pickupForm.pickupDate}
                                                     onChange={(e) => setPickupForm({ ...pickupForm, pickupDate: e.target.value })}
                                                     min={new Date().toISOString().split('T')[0]}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    No. Telepon
+                                                </label>
+                                                <input
+                                                    type="tel"
+                                                    className="input"
+                                                    placeholder="0812-xxxx-xxxx"
+                                                    value={pickupForm.pickupPhone}
+                                                    onChange={(e) => setPickupForm({ ...pickupForm, pickupPhone: e.target.value })}
                                                 />
                                             </div>
                                             <div>
@@ -363,7 +408,20 @@ export default function OrderPage() {
                             <div className="space-y-3">
                                 {step < 3 ? (
                                     <button
-                                        onClick={() => setStep(step + 1)}
+                                        onClick={() => {
+                                            // Validate courier fields on step 2
+                                            if (step === 2 && deliveryType === 'pickup_delivery') {
+                                                if (!pickupForm.pickupDate) {
+                                                    alert('Tanggal penjemputan wajib diisi!');
+                                                    return;
+                                                }
+                                                if (!pickupForm.pickupAddress) {
+                                                    alert('Alamat penjemputan wajib diisi!');
+                                                    return;
+                                                }
+                                            }
+                                            setStep(step + 1);
+                                        }}
                                         disabled={items.length === 0}
                                         className="w-full btn-primary disabled:opacity-50"
                                     >

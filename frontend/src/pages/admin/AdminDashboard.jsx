@@ -28,11 +28,15 @@ export default function AdminDashboard() {
     const getStatusBadge = (status) => {
         const badges = {
             pending: 'bg-yellow-100 text-yellow-800',
+            kurir_menuju_lokasi: 'bg-sky-100 text-sky-800',
+            barang_diterima: 'bg-emerald-100 text-emerald-800',
+            menunggu_penimbangan: 'bg-amber-100 text-amber-800',
+            menunggu_konfirmasi_berat: 'bg-orange-100 text-orange-800',
             picked_up: 'bg-blue-100 text-blue-800',
             washing: 'bg-cyan-100 text-cyan-800',
             ironing: 'bg-purple-100 text-purple-800',
             ready: 'bg-indigo-100 text-indigo-800',
-            delivering: 'bg-orange-100 text-orange-800',
+            delivering: 'bg-teal-100 text-teal-800',
             completed: 'bg-green-100 text-green-800',
             cancelled: 'bg-red-100 text-red-800',
         };
@@ -41,7 +45,11 @@ export default function AdminDashboard() {
 
     const getStatusText = (status) => {
         const texts = {
-            pending: 'Menunggu',
+            pending: 'Pesanan Baru',
+            kurir_menuju_lokasi: 'Kurir OTW',
+            barang_diterima: 'Barang Diterima',
+            menunggu_penimbangan: 'Menunggu Timbang',
+            menunggu_konfirmasi_berat: 'Konfirmasi User',
             picked_up: 'Dijemput',
             washing: 'Dicuci',
             ironing: 'Disetrika',
@@ -195,7 +203,6 @@ export default function AdminDashboard() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -220,14 +227,6 @@ export default function AdminDashboard() {
                                         </td>
                                         <td className="px-6 py-4 text-gray-500">
                                             {new Date(order.created_at).toLocaleDateString('id-ID')}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <Link
-                                                to={`/admin/orders/${order.id}`}
-                                                className="text-primary-600 hover:text-primary-700 font-medium"
-                                            >
-                                                Detail
-                                            </Link>
                                         </td>
                                     </tr>
                                 ))}

@@ -358,6 +358,34 @@ const confirmWeight = async (req, res) => {
     }
 };
 
+// Reject Weight / Cancel Order (Customer Only)
+const rejectWeight = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        // Ensure user owns this order and status is waiting for confirmation
+        const checkRes = await db.query(
+            `SELECT * FROM orders WHERE id = $1 AND user_id = $2 AND status = 'menunggu_konfirmasi_berat'`,
+            [id, userId]
+        );
+
+        if (checkRes.rows.length === 0) {
+            return res.status(400).json({ error: 'Order not found or not waiting for confirmation' });
+        }
+
+        await db.query(
+            `UPDATE orders SET status = 'cancelled', has_unread_update = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1`,
+            [id]
+        );
+
+        res.json({ message: 'Pesanan dibatalkan oleh pelanggan' });
+    } catch (error) {
+        console.error('Reject weight error:', error);
+        res.status(500).json({ error: 'Failed to reject weight' });
+    }
+};
+
 // Cancel Expired Orders (Scheduled Task)
 const cancelExpiredOrders = async () => {
     try {
@@ -409,6 +437,7 @@ module.exports = {
     getOrderStats,
     updateActualWeight,
     confirmWeight,
+    rejectWeight,
     cancelExpiredOrders,
     markAsRead
 };

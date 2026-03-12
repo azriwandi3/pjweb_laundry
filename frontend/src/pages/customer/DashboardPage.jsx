@@ -100,17 +100,17 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    <div className="card p-6">
+                    <Link to="/profile" className="card p-6 hover:shadow-lg transition-all">
                         <div className="flex items-center space-x-4">
                             <div className="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center">
-                                <span className="text-2xl">⭐</span>
+                                <span className="text-2xl">👤</span>
                             </div>
                             <div>
-                                <div className="text-2xl font-bold text-gray-900">Member</div>
-                                <div className="text-gray-500">Status Anda</div>
+                                <div className="text-2xl font-bold text-gray-900">Profil</div>
+                                <div className="text-gray-500">Edit Data Anda</div>
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 </div>
 
                 {/* Recent Orders */}

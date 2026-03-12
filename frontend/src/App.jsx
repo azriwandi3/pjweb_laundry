@@ -5,6 +5,7 @@ import MainLayout from './layouts/MainLayout';
 
 // Route Guards
 import { ProtectedRoute, AdminRoute, GuestRoute } from './components/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 
 // Public Pages
 import LandingPage from './pages/LandingPage';
@@ -17,16 +18,19 @@ import DashboardPage from './pages/customer/DashboardPage';
 import OrderPage from './pages/customer/OrderPage';
 import OrdersPage from './pages/customer/OrdersPage';
 import TrackingPage from './pages/customer/TrackingPage';
+import ProfilePage from './pages/customer/ProfilePage';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import OrderManagement from './pages/admin/OrderManagement';
+import ServiceManagement from './pages/admin/ServiceManagement';
 import FinanceReport from './pages/admin/FinanceReport';
 import SettingsPage from './pages/admin/SettingsPage';
 
 function App() {
     return (
         <Router>
+            <ScrollToTop />
             <Routes>
                 {/* Public Routes with Layout */}
                 <Route element={<MainLayout />}>
@@ -66,6 +70,14 @@ function App() {
                             </ProtectedRoute>
                         }
                     />
+                    <Route
+                        path="/profile"
+                        element={
+                            <ProtectedRoute>
+                                <ProfilePage />
+                            </ProtectedRoute>
+                        }
+                    />
 
                     {/* Admin Routes */}
                     <Route
@@ -89,6 +101,14 @@ function App() {
                         element={
                             <AdminRoute>
                                 <FinanceReport />
+                            </AdminRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/services"
+                        element={
+                            <AdminRoute>
+                                <ServiceManagement />
                             </AdminRoute>
                         }
                     />
