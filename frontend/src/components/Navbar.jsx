@@ -95,11 +95,32 @@ export default function Navbar() {
                                             <Link to={isAdmin() ? '/admin' : '/dashboard'} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                                 Dashboard
                                             </Link>
+                                            {isAdmin() && (
+                                                <>
+                                                    <Link to="/admin/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                                        📋 Kelola Pesanan
+                                                    </Link>
+                                                    <Link to="/admin/services" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                                        🧺 Kelola Layanan
+                                                    </Link>
+                                                    <Link to="/admin/reports" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                                        💰 Laporan Keuangan
+                                                    </Link>
+                                                    <Link to="/admin/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                                        ⚙️ Pengaturan
+                                                    </Link>
+                                                </>
+                                            )}
                                             {!isAdmin() && (
-                                                <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between">
-                                                    <span>Riwayat Pesanan</span>
-                                                    {hasUnread && <span className="w-2 h-2 rounded-full bg-red-500"></span>}
-                                                </Link>
+                                                <>
+                                                    <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between">
+                                                        <span>Riwayat Pesanan</span>
+                                                        {hasUnread && <span className="w-2 h-2 rounded-full bg-red-500"></span>}
+                                                    </Link>
+                                                    <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                                        👤 Profil Saya
+                                                    </Link>
+                                                </>
                                             )}
                                             <hr className="my-2 border-gray-100" />
                                             <button
